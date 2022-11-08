@@ -1,7 +1,7 @@
 version: "3.9"
 
 services:
-  stock:
+  sewerage_rainfall:
     build:
       context: .
 
@@ -9,38 +9,30 @@ services:
       - "8000:8000"
 
     volumes:
-      - ./stock:/stock
+      - ./app:/app
 
     command: >
       sh -c "python manage.py wait_for_db && 
              python manage.py migrate &&
-             python manage.py runscript runloadcsv &&
-             python manage.py runserver 0.0.0.0:8000"
+              python manage.py runserver 0.0.0.0:8000"
 
     environment:
-      - DB_HOST=stock_db
-      - DB_NAME=stock
-      - DB_USER=stock_user
-      - DB_PASS=stock
+      - DB_HOST=sewerage_rainfall_db
+      - DB_NAME=sewerage_rainfall
+      - DB_USER=sewerage_rainfall_user
+      - DB_PASS=testpass
 
     depends_on:
-      - stock_db
-      - stock_redis
+      - sewerage_rainfall_db
 
-  stock_db:
+  sewerage_rainfall_db:
     image: postgres:13-alpine
     volumes:
-      - stock-db-data:/var/lib/postgresql/data
+      - sewerage-rainfall-data:/var/lib/postgresql/data
     environment:
-      - POSTGRES_DB=stock
-      - POSTGRES_USER=stock_user
-      - POSTGRES_PASSWORD=stock
-
-  stock_redis:
-    image: redis:alpine
-    restart: always
-    ports:
-      - "6379:6379"
+      - POSTGRES_DB=sewerage_rainfall
+      - POSTGRES_USER=sewerage_rainfall_user
+      - POSTGRES_PASSWORD=testpass
 
 volumes:
-  stock-db-data:
+  sewerage-rainfall-data:
