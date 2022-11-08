@@ -1,0 +1,46 @@
+version: "3.9"
+
+services:
+  stock:
+    build:
+      context: .
+
+    ports:
+      - "8000:8000"
+
+    volumes:
+      - ./stock:/stock
+
+    command: >
+      sh -c "python manage.py wait_for_db && 
+             python manage.py migrate &&
+             python manage.py runscript runloadcsv &&
+             python manage.py runserver 0.0.0.0:8000"
+
+    environment:
+      - DB_HOST=stock_db
+      - DB_NAME=stock
+      - DB_USER=stock_user
+      - DB_PASS=stock
+
+    depends_on:
+      - stock_db
+      - stock_redis
+
+  stock_db:
+    image: postgres:13-alpine
+    volumes:
+      - stock-db-data:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_DB=stock
+      - POSTGRES_USER=stock_user
+      - POSTGRES_PASSWORD=stock
+
+  stock_redis:
+    image: redis:alpine
+    restart: always
+    ports:
+      - "6379:6379"
+
+volumes:
+  stock-db-data:
