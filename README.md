@@ -11,6 +11,7 @@ docker-compose run --rm public-sewerage-rainfall sh -c 'python manage.py test'
 ```
 - 테스트 코드는 각 app 들의 tests 폴더 참조
   - app/core/tests
+  - app/fetch/tests
 
 ### User
 - 이용자
