@@ -11,6 +11,11 @@ OPENAPI_URL=http://openapi.seoul.go.kr:8088/
 ```
 docker-compose up --build
 ```
+- http://localhost:8000/api/v1/user/create 에서 유저 생성
+- http://localhost:8000/api/v1/user/token 에서 유저 토큰 생성
+- 생성한 토큰을 Authorization 헤더에 'Token 생성한토큰' 추가 (mod header 확장앱 사용)
+
+#
 - 테스트 결과 확인
 ```
 docker-compose run --rm public-sewerage-rainfall sh -c 'python manage.py test'
