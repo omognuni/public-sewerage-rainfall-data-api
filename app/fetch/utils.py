@@ -68,7 +68,14 @@ def fetch_data(GUBN):
         if  data_time >= start_date and data_time <= end_date:
             results['수위'].append(data)
             
-    response = get_rainfall_data(GU_NAME, 1, 1000)
+    '''
+    get_rainfall_data의 end index가 100인 이유:
+    강수량 측정계가 한 지역구에 5개를 넘지 않기 때문에
+    1시간에 100개를 넘지 않음((측정계 개수) * 6 (10분에 한 번씩 측정, 1시간=6))
+    open api에 요청을 보내면 보낸 시간을 기준으로 데이터를 가져오기 때문에
+    end index를 100으로 놓고 1시간 이내인 것만 result에 추가
+    '''
+    response = get_rainfall_data(GU_NAME, 1, 100)
     
     if response == None:
         return       
