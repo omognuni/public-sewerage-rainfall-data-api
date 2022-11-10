@@ -21,6 +21,8 @@ services:
       - DB_NAME=sewerage_rainfall
       - DB_USER=sewerage_rainfall_user
       - DB_PASS=testpass
+      - OPENAPI_KEY=${OPENAPI_KEY}
+      - OPENAPI_URL=${OPENAPI_URL}
 
     depends_on:
       - sewerage_rainfall_db
