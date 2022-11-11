@@ -24,7 +24,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.environ.get('SECRET_KEY', 'changeme')
 OPENAPI_KEY = os.environ.get('OPENAPI_KEY', 'openapikey')
 
-OPENAPI_URL = os.environ.get('OPENAPI_URL', 'openapiurl') + OPENAPI_KEY + '/'
+OPENAPI_URL = os.environ.get('OPENAPI_URL', 'openapiurl') + OPENAPI_KEY
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
