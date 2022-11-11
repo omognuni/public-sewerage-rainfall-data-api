@@ -9,7 +9,7 @@ from rest_framework.test import APIClient
 from rest_framework.response import Response
 from rest_framework import status
 
-from fetch.utils import get_sewerage_data, get_rainfall_data, fetch_data
+from fetch.utils import SewerAPIProvider, RainAPIProvider, fetch_data
 
 from datetime import datetime, timedelta, timezone
 import json
@@ -17,8 +17,8 @@ import json
 GU_NAME='강남구'
 GU_CODE = '01'
 
-SEWERAGE_URL=settings.OPENAPI_URL + 'json/DrainpipeMonitoringInfo/'
-RAINFALL_URL=settings.OPENAPI_URL + 'json/ListRainfallService/'
+SEWERAGE_URL=settings.OPENAPI_URL + '/json/DrainpipeMonitoringInfo/'
+RAINFALL_URL=settings.OPENAPI_URL + '/json/ListRainfallService/'
 FETCH_URL = reverse('fetch:data')
 
 KST = timezone(timedelta(hours=9))
@@ -38,6 +38,8 @@ class FetchAPITest(TestCase):
         self.client= APIClient()
         self.user = get_user_model().objects.create_user(username='testname', password='testpass')
         self.client.force_authenticate(self.user)
+        
+        # 시간 및 데이터
         sewerage_timeset = (datetime.now(KST) - timedelta(seconds=10)).strftime(IN_DATE_FORMAT)
         rainfall_timeset = (datetime.now(KST) - timedelta(seconds=10)).strftime("%Y-%m-%d %H:%M")
         self.sewerage_sample_data = {
@@ -75,22 +77,28 @@ class FetchAPITest(TestCase):
         '''하수도 수위 데이터 가져오기 테스트'''
         start_date = '2022110810'
         end_date = '2022110811'
-                
-        data = get_sewerage_data(GU_CODE, start_date, end_date)
+        sewer_data_provider = SewerAPIProvider(key='DrainpipeMonitoringInfo', data_type='json')
 
-        url = SEWERAGE_URL + f'1/{data["DrainpipeMonitoringInfo"]["list_total_count"]}/' + GU_CODE + f'/{start_date}/{end_date}'
-        self.assertEqual(data["DrainpipeMonitoringInfo"], self.sewerage_sample_data)
+        data = sewer_data_provider.get(GU_CODE, start_date=start_date, end_date=end_date)
+        list_total_count = self.sewerage_sample_data['list_total_count']
+
+        url = SEWERAGE_URL + f'1/{list_total_count}/' + GU_CODE + f'/{start_date}/{end_date}'
+        
         self.patched_get.assert_called_with(url)
+        self.assertEqual(data, self.sewerage_sample_data)
+        
 
     def test_retrieve_rainfall_data(self):
         '''강수량 데이터 가져오기 테스트'''              
         start_idx = 1
         end_idx = 5
-        data = get_rainfall_data(GU_NAME, start_idx, end_idx)
+        rain_data_provider = RainAPIProvider(key='ListRainfallService', data_type='json')
+        data = rain_data_provider.get(GU_NAME, start_idx, end_idx)
+        
         url = RAINFALL_URL + f'{start_idx}/{end_idx}/' + GU_NAME
         
-        self.patched_get.assert_called_once_with(url)
-        self.assertEqual(data["ListRainfallService"],self.rainfall_sample_data)
+        self.patched_get.assert_called_with(url)
+        self.assertEqual(data,self.rainfall_sample_data)
 
     def test_fetch_data(self):
         '''하수도 수위와 강우량 데이터 fetching 테스트'''         
@@ -104,5 +112,6 @@ class FetchAPITest(TestCase):
         params = {'GUBN': GU_CODE}
         res = self.client.get(FETCH_URL, params)
         
+        self.assertEqual(res.status_code, status.HTTP_200_OK)        
         self.assertEqual(res.data['우량'], self.rainfall_sample_data['row'])
         self.assertEqual(res.data['수위'], self.sewerage_sample_data['row'])
