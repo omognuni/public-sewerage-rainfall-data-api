@@ -36,6 +36,8 @@ class FetchAPITest(TestCase):
         self.patched_get = (self.patcher.start())
         
         self.client= APIClient()
+        self.user = get_user_model().objects.create_user(username='testname', password='testpass')
+        self.client.force_authenticate(self.user)
         sewerage_timeset = (datetime.now(KST) - timedelta(seconds=10)).strftime(IN_DATE_FORMAT)
         rainfall_timeset = (datetime.now(KST) - timedelta(seconds=10)).strftime("%Y-%m-%d %H:%M")
         self.sewerage_sample_data = {
