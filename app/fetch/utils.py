@@ -28,11 +28,13 @@ class OpenAPIProvider:
         return response['list_total_count']
     
     def _parse_response(self, response: requests.Response) -> dict:
-        data = response.json()[self.key]
-        res_code = self._get_response_code(data)
-        if res_code == self.res_success_code:
-            return data
-        return
+        try:
+            data = response.json()[self.key]
+            res_code = self._get_response_code(data)
+            if res_code == self.res_success_code:
+                return data
+        except:
+            return
     
     def get(self, start_date: str, end_date: str)-> dict:
         url = f'{self.root_url}/{start_date}/{end_date}'
@@ -43,21 +45,19 @@ class SewerAPIProvider(OpenAPIProvider):
     def get(self, GUBN: str, start_date:str, end_date:str, start=0, end=0) -> dict:
         url = f'{self.root_url}/{self.data_type}/{self.key}/1/1/{GUBN}/{start_date}/{end_date}'
         data = self._get_response(url)
-        list_total_count = self._get_list_total_count(data)
-        # 1000 넘어가면 error 발생
-        # TODO: pagination
-        if list_total_count >= 1000:
-            list_total_count = 999
-        
-        _start = 1
-        _end = list_total_count
-        if start:
-            _start = start
-        if end:
-            _end = end
+        if data:
+            list_total_count = self._get_list_total_count(data)
             
-        url = f'{self.root_url}/{self.data_type}/{self.key}/{_start}/{_end}/{GUBN}/{start_date}/{end_date}'
-        return self._get_response(url)
+            _start = 1
+            _end = list_total_count
+            if start:
+                _start = start
+            if end:
+                _end = end
+                
+            url = f'{self.root_url}/{self.data_type}/{self.key}/{_start}/{_end}/{GUBN}/{start_date}/{end_date}'
+            return self._get_response(url)
+        return
     
 class RainAPIProvider(OpenAPIProvider):
     '''강우량 데이터 수집'''
@@ -72,7 +72,10 @@ class RainAPIProvider(OpenAPIProvider):
     def get(self, GU_NAME: str, start=1, end=100) -> dict:
 
         url = f'{self.root_url}/{self.data_type}/{self.key}/{start}/{end}/{GU_NAME}'
-        return self._get_response(url)
+        data = self._get_response(url)
+        if data:
+            return data
+        return
     
 
 def fetch_data(GUBN):

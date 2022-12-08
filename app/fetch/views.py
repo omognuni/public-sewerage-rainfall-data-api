@@ -1,6 +1,7 @@
 from rest_framework import authentication, permissions, status
 from rest_framework.views import APIView
 from rest_framework.response import Response
+from rest_framework.pagination import PageNumberPagination
 
 from fetch.utils import fetch_data
 from urllib import parse
